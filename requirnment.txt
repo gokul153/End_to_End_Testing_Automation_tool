@@ -1,0 +1,13 @@
+langchain
+langchain_community
+langchain-google-genai
+python-dotenv
+langchain-groq
+grandalf
+langgraph
+pydantic
+langchain-openai
+groq-sdk
+fastapi
+pydantic
+uvicorn
