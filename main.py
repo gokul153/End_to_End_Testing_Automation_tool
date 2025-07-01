@@ -11,3 +11,7 @@ def parse_curl(input: CurlRequestInput):
         return result
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
+    
+@app.post("/curlpython", response_model=RequestEntity)   
+def parse_python_curl(input : str):
+    return "test" 

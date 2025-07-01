@@ -10,3 +10,5 @@ class RequestEntity(BaseModel):
 
 class CurlRequestInput(BaseModel):
     curl_command: str = Field(..., description="Full cURL command string")
+
+   
