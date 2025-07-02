@@ -11,3 +11,4 @@ groq-sdk
 fastapi
 pydantic
 uvicorn
+pymongo

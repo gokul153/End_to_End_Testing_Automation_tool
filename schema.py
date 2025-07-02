@@ -1,7 +1,7 @@
 from pydantic import BaseModel, Field, HttpUrl
 from typing import Dict, Optional
 
-class RequestEntity(BaseModel):
+class RequestEntityDB(BaseModel):
     url: HttpUrl = Field(..., description="Target endpoint URL")
     method: str = Field(..., description="HTTP method, e.g., GET, POST")
     headers: Optional[Dict[str, str]] = Field(default_factory=dict, description="Request headers")
