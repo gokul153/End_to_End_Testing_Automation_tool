@@ -7,6 +7,7 @@ class RequestEntityDB(BaseModel):
     headers: Optional[Dict[str, str]] = Field(default_factory=dict, description="Request headers")
     params: Optional[Dict[str, str]] = Field(default_factory=dict, description="Query parameters")
     body: Optional[Dict] = Field(default_factory=dict, description="JSON body payload")
+    name : str  = Field(..., description="name of request")
 
 class CurlRequestInput(BaseModel):
     curl_command: str = Field(..., description="Full cURL command string")

@@ -2,17 +2,18 @@ import shlex
 import json
 from schema import RequestEntityDB
 from pymongo import MongoClient
-client=MongoClient()
+
 class RequestEntity:
-    def __init__(self, method: str = "GET", url: str = "", headers: dict = None, data: str = None):
+    def __init__(self, method: str = "GET", url: str = "", headers: dict = None, data: str = None,name : str =None):
         self.method = method
         self.url = url
         self.headers = headers if headers is not None else {}
         self.data = data
+        self.name = name
 
     def __repr__(self):
         return f"RequestEntity(method='{self.method}', url='{self.url}', headers={self.headers}, data='{self.data}')"
-def parse_curl_to_entity(curl: str) -> RequestEntity:
+def parse_curl_to_entity(curl: str,requestname: str) -> RequestEntity:
 
     request_entity = RequestEntity()
     original_tokens = shlex.split(curl) # Keep original for URL fallback
@@ -64,7 +65,8 @@ def parse_curl_to_entity(curl: str) -> RequestEntity:
             if not token.startswith("-") and token != "curl":
                 request_entity.url = token
                 break
-    request_entity.data = request_entity.data.replace("\\n", "").replace("'", "\"") if request_entity.data else None
+    #request_entity.data = request_entity.data.replace("\\n", "").replace("'", "\"") if request_entity.data else None
+    request_entity.name = requestname
     save_to_mongodb(request_entity)
     return request_entity
 
@@ -74,15 +76,23 @@ def save_to_mongodb(request_entity: RequestEntity):
     client = MongoClient("mongodb://localhost:27017/")
     db = client["gen-ai"]  # Replace with your database name
     collection = db["requests_entity_collection"]  # Replace with your collection name
-
+    print(request_entity)
     # Create a RequestEntityDB instance
     request_entity_db = RequestEntityDB(
         url=request_entity.url,
         method=request_entity.method,
         headers=request_entity.headers,
+         name=request_entity.name,
         body=json.loads(request_entity.data) if request_entity.data else {}
+       
     )
 
     # Save to MongoDB
-    result = collection.insert_one(request_entity_db.dict())
+    result = collection.insert_one({
+    "url": str(request_entity_db.url),  # Convert HttpUrl to string
+    "method": request_entity_db.method,
+    "headers": request_entity_db.headers,
+    "body": request_entity_db.body,
+    "name" : request_entity_db.name
+     })
     print(f"Inserted Request Entity with ID: {result.inserted_id}")
