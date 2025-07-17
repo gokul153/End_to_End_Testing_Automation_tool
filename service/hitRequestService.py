@@ -1,6 +1,7 @@
 import requests
 import json
 from pymongo import MongoClient
+from model.response import HttpResponse, TriggerResponse
 # MongoDB connection details
 mongo_uri = "mongodb://localhost:27017/"  # Adjust based on your database location
 db_name = "gen-ai"  # Replace with your database name
@@ -32,7 +33,7 @@ def make_api_call(name:str):
     # Ensure body is a JSON string for application/json content type
     if headers.get('Content-Type') == 'application/json':
         body = json.dumps(body)
-    
+        triggerResponse = TriggerResponse()
     # Perform the API call based on the method
     try:
         if method == 'POST':
@@ -47,9 +48,11 @@ def make_api_call(name:str):
             raise ValueError("HTTP method not supported")
         
         # Print status code and response content
+        triggerResponse.error_code = response.status_code
+        triggerResponse.response = response.text
         print(f'Status Code: {response.status_code}')
         print(f'Response: {response.text}')
         
-        return response.json() 
+        return triggerResponse
     except Exception as e:
         print(f'Error during API call: {str(e)}')    
