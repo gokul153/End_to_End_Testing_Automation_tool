@@ -1,4 +1,3 @@
-langchain
 langchain_community
 langchain-google-genai
 python-dotenv
@@ -7,10 +6,16 @@ grandalf
 langgraph
 pydantic
 langchain-openai
-groq-sdk
 fastapi
 pydantic
 uvicorn
 pymongo
 pandas
 requests
+fastapi
+pymongo
+pandas
+requests
+python-multipart
+grandalf
+langgraph
