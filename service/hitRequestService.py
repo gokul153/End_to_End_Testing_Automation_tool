@@ -1,7 +1,7 @@
 import requests
 import json
 from pymongo import MongoClient
-from model.response import HttpResponse, TriggerResponse
+from model.response.TriggerResponse import TriggerResponse
 # MongoDB connection details
 mongo_uri = "mongodb://localhost:27017/"  # Adjust based on your database location
 db_name = "gen-ai"  # Replace with your database name

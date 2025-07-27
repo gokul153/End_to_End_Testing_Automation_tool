@@ -3,6 +3,7 @@ from schema import CurlRequestInput, RequestEntityDB
 from service.parsecurlService import parse_curl_to_entity
 from service.hitRequestService import make_api_call
 from service.listAllRequestService import readallRequest
+from service.GenerateMulitpleSample import executeMultipleSample
 from fastapi import FastAPI, UploadFile, File, HTTPException
 import os
 from service.CsvService import CSVService;
@@ -51,5 +52,15 @@ async def show_all_request(request_name:str):
         return result
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
+    
+@app.post("/generate_sample")
+async def generateSampleJson(request_name:str):
+    try:
+        print("generating sample")
+        executeMultipleSample(request_name)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))    
+
+
 
 

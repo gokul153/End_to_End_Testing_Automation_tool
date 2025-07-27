@@ -22,16 +22,7 @@ class State(TypedDict):
     generated_bodies: List[Dict]
     request_name : str
 
-# Step 1: Load Data from DB
-def load_data(state: State):
-    print("Loading API Request Data from Database...")
-    data = collection.find_one({"name": state["request_name"]})
-    if not data:
-        raise ValueError("No data found")
-    return Command(
-        goto="get_user_input",
-        update={"original_body": data["body"], "user_inputs": {}, "generated_bodies": []}
-    )
+
 
 # Step 2: Get User Input per Field
 def get_user_input(state: State):
@@ -92,19 +83,17 @@ def executeMultipleSample(request_name):
     }
     # Try loading data while catching exceptions
     try:
-      command = load_data(initial_state)
+      command = get_user_input(initial_state)
     except ValueError as e:
       print(f"Error: {e}")
 
     graph = StateGraph(State)
-    graph.add_node("load_data", load_data)
     graph.add_node("get_user_input", get_user_input)
     graph.add_node("generate_payloads", generate_payloads)
     graph.add_node("store_payloads", store_payloads)
     graph.set_entry_point("load_data")
 
-    graph.add_edge(START, "load_data")
-    graph.add_edge("load_data", "get_user_input")
+    graph.add_edge(START, "get_user_input")
     graph.add_edge("get_user_input", "generate_payloads")
     graph.add_edge("generate_payloads", "store_payloads")
     graph.add_edge("store_payloads", END)
@@ -116,21 +105,21 @@ def executeMultipleSample(request_name):
     "thread_id": uuid.uuid4()
      }}
     # Example Run
-     # config = {"configurable": {"thread_id": "dynamic_payload_1"}}
+    config = {"configurable": {"thread_id": "dynamic_payload_1"}}
     
-    # result = app.invoke(initial_state, config, stream_mode="updates")
-    for chunk in app.stream(initial_state, config=thread_config):
-      for node_id, value in chunk.items():
-        #  If we reach an interrupt, continuously ask for human feedback
+    result = app.invoke(initial_state, config, stream_mode="updates")
+    # for chunk in app.stream(initial_state, config=thread_config):
+    #   for node_id, value in chunk.items():
+    #     #  If we reach an interrupt, continuously ask for human feedback
 
-        if(node_id == "__interrupt__"):
-            while True: 
-                user_feedback = input("Provide feedback (or type 'done' when finished to be done): ")
+    #     if(node_id == "__interrupt__"):
+    #         while True: 
+    #             user_feedback = input("Provide feedback (or type 'done' when finished to be done): ")
 
-                # Resume the graph execution with the user's feedback
-                app.invoke(Command(resume=user_feedback), config=thread_config)
+    #             # Resume the graph execution with the user's feedback
+    #             app.invoke(Command(resume=user_feedback), config=thread_config)
 
-                # Exit loop if user says done
-                if user_feedback.lower() == "done":
-                    break
+    #             # Exit loop if user says done
+    #             if user_feedback.lower() == "done":
+    #                 break
 
