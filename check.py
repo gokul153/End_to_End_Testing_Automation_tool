@@ -8,6 +8,7 @@ def main():
     trigger_response.error_code = 200
     trigger_response.response = {"message": "Success"}
 
+
     # Print the values to check if everything is working fine
     print(f"Error Code: {trigger_response.error_code}")
     print(f"Response: {trigger_response.response}")

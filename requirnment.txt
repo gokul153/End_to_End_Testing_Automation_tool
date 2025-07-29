@@ -19,3 +19,4 @@ requests
 python-multipart
 grandalf
 langgraph
+faiss-cpu

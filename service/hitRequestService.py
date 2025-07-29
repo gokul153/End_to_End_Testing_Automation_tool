@@ -2,6 +2,7 @@ import requests
 import json
 from pymongo import MongoClient
 from model.response.TriggerResponse import TriggerResponse
+from service.SaveResponseToDb import save_trigger_response
 # MongoDB connection details
 mongo_uri = "mongodb://localhost:27017/"  # Adjust based on your database location
 db_name = "gen-ai"  # Replace with your database name
@@ -50,9 +51,10 @@ def make_api_call(name:str):
         # Print status code and response content
         triggerResponse.error_code = response.status_code
         triggerResponse.response = response.text
+        triggerResponse.request_name = name
         print(f'Status Code: {response.status_code}')
         print(f'Response: {response.text}')
-        
+        save_trigger_response(triggerResponse)
         return triggerResponse
     except Exception as e:
         print(f'Error during API call: {str(e)}')    
