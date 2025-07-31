@@ -21,3 +21,4 @@ grandalf
 langgraph
 chromadb
 faiss-cpu
+sse-starlette 
