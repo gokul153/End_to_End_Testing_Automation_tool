@@ -6,6 +6,8 @@ from langchain_openai import ChatOpenAI
 from pymongo import MongoClient
 import os
 import uuid
+import json
+import ast
 load_dotenv()
 # MongoDB Connection Setup
 MONGO_URL = os.getenv("MONGO_URL", "mongodb://localhost:27017")
@@ -21,16 +23,22 @@ class State(TypedDict):
     user_inputs: Dict
     generated_bodies: List[Dict]
     request_name : str
-
+    metadata: Dict  # To hold url, method, headers
 # Step 1: Load Data from DB
 def load_data(state: State):
     print("Loading API Request Data from Database...")
     data = collection.find_one({"name": state["request_name"]})
     if not data:
         raise ValueError("No data found")
+    # Store the full original metadata (url, method, headers)
+    metadata = {
+        "url": data.get("url"),
+        "method": data.get("method"),
+        "headers": data.get("headers")
+    }
     return Command(
         goto="get_user_input",
-        update={"original_body": data["body"], "user_inputs": {}, "generated_bodies": []}
+        update={"original_body": data["body"], "user_inputs": {}, "generated_bodies": [], "metadata": metadata}
     )
 
 # Step 2: Get User Input per Field
@@ -50,34 +58,43 @@ def get_user_input(state: State):
 
 # Step 3: Generate Similar Payloads Using LLM
 def generate_payloads(state: State):
+    print("Generating Payloads with LLM...")
+    prompt_parts = []
+    for field, instruction in state["user_inputs"].items():
+        if instruction.strip():
+            prompt_parts.append(f"- Field `{field}`: {instruction}")
     prompt = f"""
-    Given the following user input fields and values:
-    {state["user_inputs"]}
-    take user input and based on the user input generate the same feild based on the instruction given in user inputs
-    Generate 5 variations of JSON request bodies with realistic differences but keeping the structure same.
-    Output as a JSON list.
-    """
+    You are given an original JSON request body with fields and instructions for how to vary them:
+     Original body:
+    {state["original_body"]}
+    Instructions for variations:
+    {chr(10).join(prompt_parts)}
+     Using this, generate 5 new JSON request bodies with variations as per the instructions, but keeping the structure the same. Output a JSON array only.
+     ❗ Return **only** a strict JSON array of objects. Use **double quotes**, no comments, no trailing commas.
+     """
     response = llm.predict(prompt)
-    import json
+    
     try:
-        generated = json.loads(response)
-    except json.JSONDecodeError:
-        print("Failed to decode JSON from LLM response, fallback to empty list.")
+       response_fixed = response.replace("'", '"')
+       #generated = json.loads(response_fixed)
+       generated = ast.literal_eval(response)
+       if not isinstance(generated, list):
+            raise ValueError("Expected a list of payloads")
+    except Exception as e:
+        print("❌ Failed to parse LLM output:", e)
         generated = []
     return Command(goto="store_payloads", update={"generated_bodies": generated})
 
 # Step 4: Store to DB
 def store_payloads(state: State):
+    print(f"💾 Storing {len(state['generated_bodies'])} payloads to the DB...")
     for body in state["generated_bodies"]:
         collection.insert_one({
-            "url": "https://reqres.in/api/register",
-            "method": "GET",
-            "headers": {
-                "Content-Type": "application/json",
-                "x-api-key": "reqres-free-v1"
-            },
+           "url": state["metadata"]["url"],
+            "method": state["metadata"]["method"],
+            "headers": state["metadata"]["headers"],
             "body": body,
-            "name": "generated_by_langgraph"
+            "name":   state["request_name"] +"_generated_by_langgraph"
         })
     print(f"Stored {len(state['generated_bodies'])} payloads to the database.")
     return Command(goto=END)
@@ -86,10 +103,12 @@ def store_payloads(state: State):
 def executeMultipleSample(request_name):
     initial_state: State = {
         "original_body": {},
-    "user_inputs": {},
-    "generated_bodies": [],
-    "request_name": request_name
+        "user_inputs": {},
+        "generated_bodies": [],
+        "request_name": request_name,
+        "metadata": {}
     }
+
     # Try loading data while catching exceptions
     try:
       command = load_data(initial_state)
