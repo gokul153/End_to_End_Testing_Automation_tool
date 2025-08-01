@@ -118,6 +118,7 @@ async def resume(payload: ResumeRequest):
         async for chunk in stream:
             for node, output in chunk.items():
                 if node == "__interrupt__":
+                    print("Interrupt received:", output)
                     interrupt_obj = output[0]  # Get the Interrupt instance
                     interrupt_data = getattr(interrupt_obj, "value", {})
                     yield {

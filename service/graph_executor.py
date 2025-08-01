@@ -26,6 +26,7 @@ class State(TypedDict):
     generated_bodies: List[Dict]
     request_name : str
     metadata: Dict  # To hold url, method, headers
+    current_field_index: Optional[int]
 # Step 1: Load Data from DB
 async def load_data(state: State):
     print("Loading API Request Data from Database...")
@@ -45,18 +46,34 @@ async def load_data(state: State):
 
 # Step 2: Get User Input per Field
 async def get_user_input(state: State):
-    print("Original Body:", state["original_body"])
-    user_inputs = {}
+    original_body = state["original_body"]
+    field_keys = list(original_body.keys())
 
-    for key, value in state["original_body"].items():
-        print(f"Current Field: {key}, Current Value: {value},Feedback: awaited from user")
-        #generated input need resume fuction to be called via UI 
-        user_feedback = interrupt( {
-            "key": key, 
-            "message": "provide feedback for field: " + key,
-        })
-        #user_inputs[key] = user_feedback if user_feedback.strip() != "" else value
-    #return Command(goto="generate_payloads", update={"user_inputs": user_inputs})
+    index = state.get("current_field_index", 0)
+    # If all fields are processed, go to generate step
+    if index >= len(field_keys):
+        return Command(goto="generate_payloads")
+
+    current_key = field_keys[index]
+    current_value = original_body[current_key]
+
+    # Ask for feedback on current field
+    user_feedback = interrupt({
+        "key": current_key,
+        "message": f"Provide feedback for field: {current_key}"
+    })
+
+    # After resuming, store the feedback
+    state["user_inputs"][current_key] = user_feedback or current_value
+
+    # Move to next field
+    return Command(
+        goto="get_user_input",
+        update={
+            "user_inputs": state["user_inputs"],
+            "current_field_index": index + 1
+        }
+    )
 
 # Step 3: Generate Similar Payloads Using LLM
 async def generate_payloads(state: State):
