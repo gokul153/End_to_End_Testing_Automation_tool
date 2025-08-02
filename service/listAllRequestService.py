@@ -7,13 +7,14 @@ db_name = "gen-ai"  # Replace with your database name
 collection_name = "requests_entity_collection"
 
 class RequestEntity:
-    def __init__(self, method: str = "GET", url: str = "", headers: dict = None, data: str = None,name : str =None, body: dict = None):
+    def __init__(self, method: str = "GET", url: str = "", headers: dict = None, data: str = None,name : str =None, body: dict = None, generated_by: str = None):
         self.method = method
         self.url = url
         self.headers = headers if headers is not None else {}
         self.data = data 
         self.name = name
         self.body = body if body is not None else {}
+        self.generated_by = generated_by
 
     def __repr__(self):
         return f"RequestEntity(method='{self.method}', url='{self.url}', headers={self.headers}, data='{self.data}')"

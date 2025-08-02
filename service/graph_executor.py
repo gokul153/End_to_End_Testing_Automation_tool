@@ -88,7 +88,7 @@ async def generate_payloads(state: State):
     {state["original_body"]}
     Instructions for variations:
     {chr(10).join(prompt_parts)}
-     Using this, generate 5 new JSON request bodies with variations as per the instructions, but keeping the structure the same. Output a JSON array only.
+     Using this, generate 3 new JSON request bodies with variations as per the instructions, but keeping the structure the same. Output a JSON array only.
      ❗ Return **only** a strict JSON array of objects. Use **double quotes**, no comments, no trailing commas.
      """
     response = llm.predict(prompt)
@@ -113,7 +113,9 @@ async def store_payloads(state: State):
             "method": state["metadata"]["method"],
             "headers": state["metadata"]["headers"],
             "body": body,
-            "name":   state["request_name"] +"_generated_by_langgraph"
+            "name":   state["request_name"] ,
+            "generated_by": "ai_agent",
+            "request_key": state["request_name"] + "_" + str(uuid.uuid4())  # Unique key for each request
         })
     print(f"Stored {len(state['generated_bodies'])} payloads to the database.")
     return Command(goto=END)
