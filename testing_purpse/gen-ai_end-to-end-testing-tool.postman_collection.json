@@ -58,7 +58,7 @@
 					},
 					{
 						"key": "X-goog-api-key",
-						"value": "AIzaSyBzFo1bvqWNZDWgvEJNXxdNIMNNR6kSa-U"
+						"value": "AIzaSyBzFo1bvqWNZDWgvEJNXxdNIMNN"
 					}
 				],
 				"body": {
@@ -84,7 +84,7 @@
 						"gemini-2.0-flash:generateContent"
 					]
 				},
-				"description": "Generated from cURL: curl \"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent\" \\\r\n  -H 'Content-Type: application/json' \\\r\n  -H 'X-goog-api-key: GEMINI_API_KEY' \\\r\n  -X POST \\\r\n  -d '{\r\n    \"contents\": [\r\n      {\r\n        \"parts\": [\r\n          {\r\n            \"text\": \"Explain how AI works in a few words\"\r\n          }\r\n        ]\r\n      }\r\n    ]\r\n  }'"
+				"description": "Generated from cURL: curl \"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent\" \\\r\n  -H 'Content-Type: application/json' \\\r\n  -H 'X-goog-api-key: GEMINI_API_Y' \\\r\n  -X POST \\\r\n  -d '{\r\n    \"contents\": [\r\n      {\r\n        \"parts\": [\r\n          {\r\n            \"text\": \"Explain how AI works in a few words\"\r\n          }\r\n        ]\r\n      }\r\n    ]\r\n  }'"
 			},
 			"response": []
 		},
