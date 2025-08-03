@@ -6,9 +6,11 @@ from service.hitRequestService import make_api_call
 from service.listAllRequestService import readallRequest
 from service.GenerateMulitpleSample import executeMultipleSample
 from service.graph_executor import LangGraphRunner
+from service.graphExecuterResponseAnalysing import LangGraphRunnerResponseAnalyser
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi import Query
 import os
+import json
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from service.CsvService import CSVService;
@@ -16,9 +18,10 @@ from sse_starlette.sse import EventSourceResponse
 import uuid
 from fastapi import Body
 from model.response.request.ResumeRequest import ResumeRequest
-
+from model.response.request.ResumeResponsePayload import ResumePayloadResponse
 app = FastAPI()
 runner = LangGraphRunner()
+runner_response_analyser = LangGraphRunnerResponseAnalyser()
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],  
@@ -80,6 +83,65 @@ async def generateSampleJson(request_name:str):
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))    
 sessions = {}
+@app.get("/chat_stream_response/{request_name}")
+async def chat_stream_response(request_name: str, checkpoint_id: Optional[str] = Query(None)):
+    thread_id = checkpoint_id if checkpoint_id else str(uuid.uuid4())
+    if thread_id not in sessions:
+        sessions[thread_id] = []
+    stream = await runner_response_analyser.start_response(request_name, thread_id)
+
+    async def event_generator():
+        async for chunk in stream:
+            for node, output in chunk.items():
+                if node == "__interrupt__":
+                    interrupt_obj = output[0]  # Get the Interrupt instance
+                    interrupt_data = getattr(interrupt_obj, "value", {})
+                    yield {
+                        ## need explaination on this
+                        "event": "interrupt",
+                        "data": json.dumps({
+                            "message": interrupt_data.get("message", ""),
+                            "fields": interrupt_data.get("key", [])
+                        })
+                        
+                    }
+                else:
+                    yield {
+                       
+                        "event": "update",
+                        "data": f"{node}: {output}"
+                    }
+        yield {"event": "end", "data": "Execution finished"}
+
+    return EventSourceResponse(event_generator())
+
+@app.post("/resume_response")
+async def resume_response(payload: ResumePayloadResponse):
+    stream = await runner_response_analyser.resume_response(payload.thread_id, payload.feilds)
+
+    async def resume_generator():
+        async for chunk in stream:
+            for node, output in chunk.items():
+                if node == "__interrupt__":
+                    interrupt_obj = output[0]
+                    interrupt_data = getattr(interrupt_obj, "value", {})
+                    yield {
+                        "event": "interrupt",
+                       "data": json.dumps({
+                            "message": interrupt_data.get("message", ""),
+                            "fields": interrupt_data.get("fields", [])
+                        })
+                      
+                    }
+                else:
+                    yield {
+                        "event": "update",
+                        "data": f"{node}: {output}"
+                    }
+
+        yield {"event": "end", "data": "Execution resumed and finished"}
+
+    return EventSourceResponse(resume_generator())
 @app.get("/chat_stream/{request_name}")
 async def chat_stream(request_name: str, checkpoint_id: Optional[str] = Query(None)):
     thread_id = checkpoint_id

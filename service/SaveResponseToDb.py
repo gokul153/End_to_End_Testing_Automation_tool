@@ -13,7 +13,7 @@ client = MongoClient('mongodb://localhost:27017/')  # Replace with your MongoDB 
 db = client['gen-ai']  
 collection = db['response-logging']  
 
-def save_trigger_response(trigger_response: TriggerResponse):
+def save_trigger_response(trigger_response: TriggerResponse, user_inputs: list = None):
     # Convert the Pydantic model to a dictionary
     response_dict = trigger_response.dict(by_alias=True)
     
@@ -57,11 +57,34 @@ def save_trigger_response(trigger_response: TriggerResponse):
             "request_key": trigger_response.request_key,
             "timestamp": trigger_response.timestamp
         }
+    ),
+      Document(
+        page_content=f"User has given feed back based on the response it includes which of the feilds are to be monitered:  {user_inputs}",
+        metadata={
+            "type": "user_feedback",
+            "request_key": trigger_response.request_key,
+            "timestamp": trigger_response.timestamp
+        }
     )
     ]
 
     load_dotenv()
     embedding_function = OpenAIEmbeddings()
-    db = Chroma.from_documents(docs, embedding_function)
-    return db._collection.get()["ids"]  # Or use db.add_documents() and track IDs if using persistent DB
- 
+    persist_dir = "./chroma_db"  # Set persistent directory
+
+    # 4. Initialize or load the persistent Chroma DB
+    if os.path.exists(persist_dir):
+      # Load existing store
+      db = Chroma(persist_directory=persist_dir, embedding_function=embedding_function)
+    else:
+       # First-time init with new docs
+      db = Chroma.from_documents(docs, embedding_function, persist_directory=persist_dir)
+
+     # 5. Add new documents to the store
+      db.add_documents(docs)
+
+     # 6. Persist to disk
+      db.persist()
+
+     # 7. Return document IDs
+      return db._collection.get()["ids"]

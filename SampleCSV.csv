@@ -1,0 +1,5 @@
+request_id,request_Name,curl_request,request_type
+ABC12,checkSample1,"curl --location 'https://reqres.in/api/register' \
+--header 'Content-Type: application/json' \
+--header 'x-api-key: reqres-free-v1' \
+--data-raw '{""email"": ""eve.holt@reqres.in"", ""password"": ""pistol""}'",POST

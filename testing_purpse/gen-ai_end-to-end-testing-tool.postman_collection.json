@@ -1,0 +1,322 @@
+{
+	"info": {
+		"_postman_id": "987d8eb8-c0ec-4901-af40-f62bfc7df704",
+		"name": "gen-ai_end-to-end-testing-tool",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "43612364",
+		"_collection_link": "https://gok-8604693.postman.co/workspace/gok's-Workspace~ab6ca5f5-b3af-4e0a-8a8d-0e9f9b7c7be4/collection/43612364-987d8eb8-c0ec-4901-af40-f62bfc7df704?action=share&source=collection_link&creator=43612364"
+	},
+	"item": [
+		{
+			"name": "https://api.openai.com/v1/responses",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer $OPENAI_API_KEY"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"model\": \"gpt-4o\",\r\n    \"input\": \"Tell me a three sentence bedtime story about a unicorn.\"\r\n  }",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://api.openai.com/v1/responses",
+					"protocol": "https",
+					"host": [
+						"api",
+						"openai",
+						"com"
+					],
+					"path": [
+						"v1",
+						"responses"
+					]
+				},
+				"description": "Generated from cURL: curl https://api.openai.com/v1/responses \\\r\n  -H \"Content-Type: application/json\" \\\r\n  -H \"Authorization: Bearer $OPENAI_API_KEY\" \\\r\n  -d '{\r\n    \"model\": \"gpt-4o\",\r\n    \"input\": \"Tell me a three sentence bedtime story about a unicorn.\"\r\n  }'"
+			},
+			"response": []
+		},
+		{
+			"name": "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-goog-api-key",
+						"value": "AIzaSyBzFo1bvqWNZDWgvEJNXxdNIMNNR6kSa-U"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"contents\": [\r\n      {\r\n        \"parts\": [\r\n          {\r\n            \"text\": \"Explain how AI works in a few words\"\r\n          }\r\n        ]\r\n      }\r\n    ]\r\n  }",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent",
+					"protocol": "https",
+					"host": [
+						"generativelanguage",
+						"googleapis",
+						"com"
+					],
+					"path": [
+						"v1beta",
+						"models",
+						"gemini-2.0-flash:generateContent"
+					]
+				},
+				"description": "Generated from cURL: curl \"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent\" \\\r\n  -H 'Content-Type: application/json' \\\r\n  -H 'X-goog-api-key: GEMINI_API_KEY' \\\r\n  -X POST \\\r\n  -d '{\r\n    \"contents\": [\r\n      {\r\n        \"parts\": [\r\n          {\r\n            \"text\": \"Explain how AI works in a few words\"\r\n          }\r\n        ]\r\n      }\r\n    ]\r\n  }'"
+			},
+			"response": []
+		},
+		{
+			"name": "https://reqres.in/api/register",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"email\": \"eve.holt@reqres.in\", \"password\": \"pistol\"}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://reqres.in/api/register",
+					"protocol": "https",
+					"host": [
+						"reqres",
+						"in"
+					],
+					"path": [
+						"api",
+						"register"
+					]
+				},
+				"description": "Generated from cURL: curl -X POST https://reqres.in/api/register \\\r\n-H \"Content-Type: application/json\" \\\r\n-d '{\"email\": \"eve.holt@reqres.in\", \"password\": \"pistol\"}'\r\n"
+			},
+			"response": []
+		},
+		{
+			"name": "https://reqres.in/api/register Copy",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"email\": \"eve.holt@reqres.in\", \"password\": \"pistol\"}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://reqres.in/api/register",
+					"protocol": "https",
+					"host": [
+						"reqres",
+						"in"
+					],
+					"path": [
+						"api",
+						"register"
+					]
+				},
+				"description": "Generated from cURL: curl -X POST https://reqres.in/api/register \\\r\n-H \"Content-Type: application/json\" \\\r\n-d '{\"email\": \"eve.holt@reqres.in\", \"password\": \"pistol\"}'\r\n"
+			},
+			"response": []
+		},
+		{
+			"name": "excute_the-generate-sample",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "accept",
+						"value": "application/json"
+					}
+				],
+				"url": {
+					"raw": "http://127.0.0.1:8000/chat_stream/checkSample1?checkpoint_id=t1",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"chat_stream",
+						"checkSample1"
+					],
+					"query": [
+						{
+							"key": "checkpoint_id",
+							"value": "t1"
+						}
+					]
+				},
+				"description": "Generated from cURL: curl -X 'GET' \\\r\n  'http://127.0.0.1:8000/chat_stream/checkSample1?checkpoint_id=t1' \\\r\n  -H 'accept: application/json'"
+			},
+			"response": []
+		},
+		{
+			"name": "New Request",
+			"request": {
+				"method": "GET",
+				"header": []
+			},
+			"response": []
+		},
+		{
+			"name": "resume",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "accept",
+						"value": "application/json"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"thread_id\": \"t1\",\r\n  \"feedback\": \"generate email with @gmail.com\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8000/resume",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"resume"
+					]
+				},
+				"description": "Generated from cURL: curl -X 'POST' \\\r\n  'http://127.0.0.1:8000/resume' \\\r\n  -H 'accept: application/json' \\\r\n  -H 'Content-Type: application/json' \\\r\n  -d '{\r\n  \"thread_id\": \"t1\",\r\n  \"feedback\": \"generate email with @gmail.com\"\r\n}'"
+			},
+			"response": []
+		},
+		{
+			"name": "Streaming response",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "accept",
+						"value": "application/json"
+					}
+				],
+				"url": {
+					"raw": "http://127.0.0.1:8000/chat_stream_response/checkSample1?checkpoint_id=tryFinal13",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"chat_stream_response",
+						"checkSample1"
+					],
+					"query": [
+						{
+							"key": "checkpoint_id",
+							"value": "tryFinal13"
+						}
+					]
+				},
+				"description": "Generated from cURL: curl -X 'GET' \\\r\n  'http://127.0.0.1:8000/chat_stream_response/checkSample1?checkpoint_id=tryFinal13' \\\r\n  -H 'accept: application/json'"
+			},
+			"response": []
+		},
+		{
+			"name": "resume thread response",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "accept",
+						"value": "application/json"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"thread_id\": \"tryFinal13\",\r\n  \"feilds\": [\r\n    \"error\"\r\n  ]\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8000/resume_response",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"resume_response"
+					]
+				},
+				"description": "Generated from cURL: curl -X 'POST' \\\r\n  'http://127.0.0.1:8000/resume_response' \\\r\n  -H 'accept: application/json' \\\r\n  -H 'Content-Type: application/json' \\\r\n  -d '{\r\n  \"thread_id\": \"tryFinal13\",\r\n  \"feilds\": [\r\n    \"error\"\r\n  ]\r\n}'"
+			},
+			"response": []
+		}
+	]
+}
