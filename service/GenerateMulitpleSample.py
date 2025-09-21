@@ -8,6 +8,9 @@ import os
 import uuid
 import json
 import ast
+
+from service.BigQueryService import BigQueryService
+bq_service = BigQueryService()
 load_dotenv()
 # MongoDB Connection Setup
 MONGO_URL = os.getenv("MONGO_URL", "mongodb://localhost:27017")
@@ -44,17 +47,45 @@ def load_data(state: State):
 # Step 2: Get User Input per Field
 def get_user_input(state: State):
     print("Original Body:", state["original_body"])
-    user_inputs = {}
+     # Always start from previously collected user inputs
+    user_inputs = state.get("user_inputs", {}).copy()
+    SPECIAL_FIELDS = {"hospital", "doctor", "billing Amount"}
+     # Track progress: which fields have been processed
+    processed_keys = set(user_inputs.keys())
+    # Find the next unprocessed field
+    next_field = None
+    for key in state["original_body"].keys():
+        if key not in processed_keys:
+            next_field = key
+            break
 
-    for key, value in state["original_body"].items():
-        print(f"Current Field: {key}, Current Value: {value},Feedback: awaited from user")
-        #generated input need resume fuction to be called via UI 
-        user_feedback = interrupt( {
-            "key": key, 
-            "message": "provide feedback for field: " + key,
-        })
-        user_inputs[key] = user_feedback if user_feedback.strip() != "" else value
-    return Command(goto="generate_payloads", update={"user_inputs": user_inputs})
+    # If no more fields left → move to generate_payloads
+    if not next_field:
+        return Command(goto="generate_payloads", update={"user_inputs": user_inputs})
+    
+    print(f"Current Field: {next_field}, Current Value: {state['original_body'][next_field]}")
+
+    # Handle special fields via BigQuery auto-fill
+    print(next_field.lower() + " Next Feild")
+    print(SPECIAL_FIELDS + " special_feilds")
+    if next_field.lower() in SPECIAL_FIELDS:
+        try:
+            rows = bq_service.get_hospitals(next_field)  # returns List[Dict]
+            if rows:
+                sample_values = [list(r.values())[0] for r in rows if r]
+                user_inputs[next_field] = sample_values
+                print(f"Auto-filled '{next_field}' with {len(sample_values)} values from BigQuery")
+                # Immediately call get_user_input again to continue with next field
+                return Command(goto="get_user_input", update={"user_inputs": user_inputs})
+        except Exception as e:
+            print(f"BigQuery failed for {next_field}: {e}. Falling back to user interrupt.")
+
+    # Otherwise: pause and ask the user
+    return interrupt({
+        "key": next_field,
+        "message": "Provide feedback for field: " + next_field,
+    })
+
 
 # Step 3: Generate Similar Payloads Using LLM
 def generate_payloads(state: State):
@@ -143,13 +174,16 @@ def executeMultipleSample(request_name):
         #  If we reach an interrupt, continuously ask for human feedback
 
         if(node_id == "__interrupt__"):
+            key = value.get("key")
             while True: 
-                user_feedback = input("Provide feedback (or type 'done' when finished to be done): ")
+                 
+                 user_feedback = input(f"Feedback for {key} (or type 'done'): ")
+                 if user_feedback.lower() == "done":
+                   break
 
-                # Resume the graph execution with the user's feedback
-                app.invoke(Command(resume=user_feedback), config=thread_config)
+                
 
-                # Exit loop if user says done
-                if user_feedback.lower() == "done":
-                    break
+                 # Resume execution at get_user_input again
+                 app.invoke(Command(resume={"user_inputs": new_inputs}), config=thread_config)
+            break
 

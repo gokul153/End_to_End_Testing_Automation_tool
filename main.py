@@ -19,6 +19,12 @@ import uuid
 from fastapi import Body
 from model.response.request.ResumeRequest import ResumeRequest
 from model.response.request.ResumeResponsePayload import ResumePayloadResponse
+from typing import List, Dict, Optional
+from service.BigQueryService import BigQueryService
+from pydantic import BaseModel ,Field
+# Define the Pydantic model for the request body
+class BigQueryRequest(BaseModel):
+    feild_name: Optional[str] = None
 app = FastAPI()
 runner = LangGraphRunner()
 runner_response_analyser = LangGraphRunnerResponseAnalyser()
@@ -33,7 +39,8 @@ app.add_middleware(
 mongo_uri = "mongodb://localhost:27017/"
 db_name = "gen-ai"
 collection_name = "request-recieved-csv"
-
+# Instantiate the service class
+bq_service = BigQueryService()
 csv_service = CSVService(mongo_uri, db_name, collection_name)
 
 @app.post("/parse-curl", response_model=RequestEntityDB)
@@ -196,3 +203,23 @@ async def resume(payload: ResumeRequest):
         yield {"event": "end", "data": "Execution resumed and finished"}
 
     return EventSourceResponse(resume_generator())
+
+
+@app.post("/hospitals/", response_model=List[Dict])
+def get_hospital_data(request: BigQueryRequest):
+    """
+    API endpoint to fetch a list of hospitals from BigQuery
+    using a request body.
+    
+    Args:
+        request: A JSON object in the request body with the key 'hospital_name'.
+    
+    Returns:
+        A JSON array of hospital records.
+    """
+    try:
+        # Pass the hospital_name from the request body to the service
+        hospitals = bq_service.get_hospitals(request.feild_name)
+        return hospitals
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
